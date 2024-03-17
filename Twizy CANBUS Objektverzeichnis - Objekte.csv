@@ -1,0 +1,82 @@
+ID,Periode,Drv/Chg,Quelle,Objektname,Länge,Byte(s),Bedeutung,Werte,Bestätigt?
+0080,20,D,CON,Sync,0,-,Master Datenanforderung / Bus-Timer,-,x
+0081,-,D,CON,Fehlercode,8,4+5,SEVCON-Fehlermeldung,"B5=High, B4=Low-Byte, B2+3 = Zusatzdaten?, B6+7+8 = Zusatzdaten?
+bspw. wenn Fahrstufentaste D/N/R gedrückt und losgelassen wird, ohne das der Twizy auf Go steht:
+- 00 10 01 8E 48 00 00 00 = Code 0x488E = Mom dir (Request)
+- 00 00 00 8E 48 00 00 08 = ... Fehler
+oder
+- 00 50 40 02 51 03 03 00 = Code 0x5102 = Line Contactor welded (Schütz-Fehler)",x
+0155,10,D+C,BMS,BMS 1,8,1,Ladeleistungs-Steuerung (BMS→CHG),"in Stufen 7..0, mit Ladeleistung = Stufe * 300 W bzw. Ladestrom = Stufe * 5 A (jeweils am Akku)
+(Stufe 0 bei 100% SOC, nach Abschaltung des Ladestroms wieder Stufe 1)",x
+0155,10,D+C,BMS,BMS 1,8,2+3,Strom am Traktionsakku,"untere 12 Bit: 7D0h = 2000d Nullpunkt, Abweichung * 16 = ca. Leistung [W], negativ=Entnahme
+Strom-Interpretation: Abweichung / 4 = Strom [A]
+obere 4 Bit: Ladegerät-Handshake (9→A→9) parallel zu 3MW",x
+0155,10,D+C,BMS,BMS 1,8,4,Phase,94h = Init/Exit-Phase = Daten ungültig // 54h = Daten gültig,x
+0155,10,D+C,BMS,BMS 1,8,5+6,Ladezustand SOC,SOC% = Dezimalwert / 400; nur die oberen 13 Bit werden verwendet; Ladeschluss = 9C40h,x
+0155,10,D+C,BMS,BMS 1,8,7,?,Fix 0 ?,
+0155,10,D+C,BMS,BMS 1,8,8,?,? Bereich 5Fh - 73h,
+0196,10,D,CON,Energiestatus 2,8,4+5,Leistungsanforderung? Drehmoment? Schlupf?,"8 Bit B4 + 1 Bit B5: Ruhewert 254, aktuelle Leistungsanforderung [W] = Abweichung * 250, negativ = Bremsen/Rückw.",?
+0196,10,D,CON,Energiestatus 2,8,6,Temperatur Motor,Temperatur in °C = Wert - 40,x
+019F,10,D,CON,Energiestatus 3,8,1,?,Fix FFh ?,
+019F,10,D,CON,Energiestatus 3,8,2,?,Fix FFh ?,
+019F,10,D,CON,Energiestatus 3,8,3+4,Geschwindigkeit (+/-),"8 Bit B3 + 4 Bit B4: Ruhewert 7D0h=2000, rpm=(Wert-2000)*10, kph=rpm/7250*80 (T80)",x
+019F,10,D,CON,Energiestatus 3,8,5,j,Fix 38h ?,
+019F,10,D,CON,Energiestatus 3,8,6,?,Fix FFh ?,
+019F,10,D,CON,Energiestatus 3,8,7,?,Fix 40h ?,
+019F,10,D,CON,Energiestatus 3,8,8,?,Fix FEh?,
+0423,100,D+C,CHG,?,8,1,?,"03h = ON, 00h = OFF",?
+0423,100,D+C,CHG,?,8,2,?,?,?
+0423,100,D+C,CHG,?,8,7+8,?,steigt nach dem Einschalten auf 00E0 o.ä. an und bleibt dann rel. konstant,?
+0424,100,D+C,BMS,BMS 2,8,1,Ladeprotokoll BMS→CHG,"1xh = siehe Blatt ""Ladeprotokoll"" / 9xh = Fehler im Akku",x
+0424,100,D+C,BMS,BMS 2,8,2,?,Fix 40h ?,
+0424,100,D+C,BMS,BMS 2,8,3,Maximale Reku-Leistung (BMS→CON),"Aktuelle maximale Rekuperations-Leistung [W] = Wert * 500 (Ladeleistung s. 155_1 / Blatt ""Ladeprotokoll"")",x
+0424,100,D+C,BMS,BMS 2,8,4,Maximale Fahr-Leistung (BMS→CON),Aktuelle maximale Entlade-Leistung [W] = Wert * 500,x
+0424,100,D+C,BMS,BMS 2,8,5,? Temperatur,Bereich 32h - 47h (-1 / -2 Diff. zu B8) -- vermutlich Zellen-Temp.-Minimum,?
+0424,100,D+C,BMS,BMS 2,8,6,Akku-Zustand (SOH),in Prozent,x
+0424,100,D+C,BMS,BMS 2,8,7,?,Fix 00h ?,
+0424,100,D+C,BMS,BMS 2,8,8,? Temperatur,Bereich 32h - 47h (+1 / +2 Diff. zu B5) -- vermutlich Zellen-Temp.-Maximum,?
+0425,100,D+C,BMS,BMS 3,8,1,Ladeprotokoll BMS→CHG,"siehe Blatt ""Ladeprotokoll""",?
+0425,100,D+C,BMS,BMS 3,8,2,Verfügbare Energie im Akku,"Energiemenge in 1/10 kWh, bezieht Akkualterung ein",?
+0425,100,D+C,BMS,BMS 3,8,5-6,Spannung,"Wert = Bits 9..1 >> 1 -- bspw. 310 bei 57,5V -- Umrechnung?",?
+0425,100,D+C,BMS,BMS 3,8,7-8,Spannung,"Wert = Bits 8..0 -- bspw. 310 bei 57,5V -- Umrechnung?",?
+0426,100,D+C,CHG,Fahrdaten 4,7,4-6,Odometer,km-Stand = Wert direkt [warum vom Ladegerät?],x
+0436,100,D+C,DSP,Uhr,6,1-4,Minutenzähler,Anzahl Minuten seit die Uhr Strom hat,x
+0554,1000,D+C,BMS,Zellentemperaturen,8,1-7,Temperaturen Zellmodule 1-7,Temperatur in °C = Wert - 40,x
+0556,100,D+C,BMS,Zellenmonitor 1,8,1-8,Modulspannungen 1-5,"12-Bit-Werte, Spannung [V] = Dezimalwert / 200",x
+0557,1000,D+C,BMS,Zellenmonitor 2,8,1-8,Modulspannungen 6-10,"12-Bit-Werte, Spannung [V] = Dezimalwert / 200",x
+055E,1000,D+C,BMS,Zellenmonitor 3,8,1-6,Modulspannungen 11-14,"12-Bit-Werte, Spannung [V] = Dezimalwert / 200",x
+055E,1000,D+C,BMS,Zellenmonitor 3,8,7-8,Akku-Kilometerstand,"in 10km, bspw. 0C1Ch = 3100 = 31.000 km",x
+055F,1000,D+C,BMS,Zellenmonitor 4,8,6-8,Gesamtspannungen,"Zwei separate Gesamtspannungen (12 Bit), Spannung [V] = Dezimalwert / 10",x
+0597,100,D+C,CHG,12V-Netz,8,1,Netzstatus,siehe Blatt 0597,x
+0597,100,D+C,CHG,12V-Netz,8,2,Status-Flags,siehe Blatt 0597,x
+0597,100,D+C,CHG,12V-Netz,8,3,Strom DC/DC-Wandler,"Ruhewert 05, GO: 07, Standlicht 18, Abblendlicht 40, Fernlicht 45, Scheibenheizung 2B, Rückfahrleuchte 15
+12V-Ladung=03 => Annahme: Wert in 1/5 A",?
+0597,100,D+C,CHG,12V-Netz,8,4,Ladeprotokoll CHG→BMS,"Init=A1/A2/C1; ON=41h; OFF=>D1h; Laden=B1; Bereitschaft/12V-Erhaltung=91
+siehe Blatt ""Ladeprotokoll""",?
+0597,100,D+C,CHG,12V-Netz,8,5,? Flags/Version?,"Fix 29h ? nein, aktuell 2Fh (neuer Lader)",?
+0597,100,D+C,CHG,12V-Netz,8,6,?,Fix 0 ?,
+0597,100,D+C,CHG,12V-Netz,8,7,?,Fix 1 ?,
+0597,100,D+C,CHG,12V-Netz,8,8,Temperatur Ladegerät,Temperatur in °C = Wert - 40,x
+0599,100,D+C,DSP,Fahrdaten 1,8,1-4,Odometer,km-Stand = Wert direkt,x
+0599,100,D+C,DSP,Fahrdaten 1,8,5,?,Fix FFh ?,
+0599,100,D+C,DSP,Fahrdaten 1,8,6,Restreichweite,in km (dezimal),x
+0599,100,D+C,DSP,Fahrdaten 1,8,7+8,Geschwindigkeit (absolut),"Ruhewert 0000h .. Vmax 1FB2h = 8114 = 81,14 km/h (bei Anzeige 84 km/h) (Achtung: 0xFFFF = ungültig)",x
+059B,100,D,CON,Antriebstatus 1,8,1,Gangwahl,80h=D / 20h=N / 08h=R,x
+059B,100,D,CON,Antriebstatus 1,8,2,Bremspedal / Bremsleuchte + Motorstatus,"Bit 0 (0x01) = Bremspedal/leuchte // Bits 2+3 (0x0C) = Motor/Controller an (""gezündet"")",x
+059B,100,D,CON,Antriebstatus 1,8,3,Leistung / Drehmoment (?),"100=""Null"" / >100=Abgabe / <100=Rekuperation; Bereich 88...163 (?)",?
+059B,100,D,CON,Antriebstatus 1,8,4,Strompedalstellung,00h=Stop … FDh=Max,x
+059B,100,D,CON,Antriebstatus 1,8,5,Bremspedal / Bremsleuchte + Motorstatus,"oberes Nibble: 4=Bremse inaktiv / 6=aktiv // unteres Nibble: 0=Motor/Controller aus 4=an, 8=Fehler",x
+059B,100,D,CON,Antriebstatus 1,8,6,Spannung Kondensator,Spannung [V] = Wert / 2,?
+059B,100,D,CON,Antriebstatus 1,8,7,?,Fix 0 ?,
+059B,100,D,CON,Antriebstatus 1,8,8,?,Fix 90h = 144 ?,
+059E,100,D,CON,Fahrdaten 3,8,1+2,Streckenzähler,"zyklischer Wegzähler in 1/10 m bspw. Wert 4605 = 460,5 m, NICHT Tripzähler!",x
+059E,100,D,CON,Fahrdaten 3,8,6,Temperatur PEM (Controller),Temperatur in °C = Wert - 40,x
+05D7,100,D+C,DSP,Fahrdaten 2,7,1+2,Geschwindigkeit (exakt),"Ruhewert 0000h .. Vmax 1FB2h = 8114 = 81,14 km/h (bei Anzeige 84 km/h)",x
+05D7,100,D+C,DSP,Fahrdaten 2,7,3-6,Odometer,km-Stand = Wert / 1600,x
+05D7,100,D+C,DSP,Fahrdaten 2,7,7,?,Fix 0 ?,
+0627,100,D+C,CHG,?,3,1-3,? Statusmeldung CHG?,"Fix 00 00 00 wenn BMS online (siehe Tab ""0627"")",
+0628,100,D+C,BMS,?,3,1-3,? Statusmeldung BMS?,Fix 00 00 00 -- bleibt aus wenn BMS offline,x
+0629,100,D,CON,?,3,1-3,? Statusmeldung CON?,"Fix 00 00 00 -- beginnt erst mit 59B/59E, also wenn Controller betriebsbereit -- bleibt aus wenn BMS offline",x
+0659,3000,D+C,BMS,?,4,1-4,? Statusmeldung BMS?,Fix FF FF FF FF -- TODO: prüfen ob anders bei PREOP-Modus aktiv -- bleibt aus wenn BMS offline,
+069F,1000,D+C,DSP,VIN,4,1-4,Seriennummer,"fix F im ersten Nibble, weitere Nibbles = letzte 7 Ziffern der VIN rückwärts",x
+0701,500,D,CON,Op/PreOp-Modus,1,1,SEVCON Pre/Op-Statusmeldung,"Init = 00, danach 05=OP / 7F=PREOP -- bleibt aus wenn BMS offline",x
